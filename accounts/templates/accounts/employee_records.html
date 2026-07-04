@@ -149,6 +149,32 @@
         {% endif %}
     </div>
 </div>
+
+<div class="card" style="margin-top:24px;">
+    <div class="section-title">Uploaded Documents</div>
+    {% if documents %}
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Type</th>
+                <th scope="col">File</th>
+                <th scope="col">Uploaded</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in documents %}
+            <tr>
+                <td>{{ doc.get_document_type_display }}</td>
+                <td><a href="{{ doc.document.url }}" target="_blank" rel="noopener">{{ doc.filename }}</a></td>
+                <td>{{ doc.uploaded_at|date:"M j, Y g:i A" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="meta-sub">No documents uploaded by this employee.</p>
+    {% endif %}
+</div>
 {% elif not error %}
 <div class="card">
     <p class="meta-sub" style="text-align:center; padding:2rem 0;">Enter an Employee ID above to view their attendance and leave history.</p>

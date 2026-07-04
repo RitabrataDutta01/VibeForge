@@ -1,0 +1,61 @@
+{% extends "accounts/base.html" %}
+{% block title %}My Documents{% endblock %}
+{% block content %}
+
+<div class="hdr">
+    <h1 style="font-size:22px; font-weight:700;">My Documents</h1>
+</div>
+
+<div class="card" style="margin-bottom:24px;">
+    <div class="section-title">Upload a Document</div>
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div class="alert alert-danger" role="alert" style="margin-top:6px; padding:6px 10px; font-size:12px;">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-upload"></i> Upload</button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="section-title">Uploaded Documents</div>
+    {% if documents %}
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Type</th>
+                <th scope="col">File</th>
+                <th scope="col">Uploaded</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in documents %}
+            <tr>
+                <td>{{ doc.get_document_type_display }}</td>
+                <td><a href="{{ doc.document.url }}" target="_blank" rel="noopener">{{ doc.filename }}</a></td>
+                <td>{{ doc.uploaded_at|date:"M j, Y g:i A" }}</td>
+                <td style="text-align:right;">
+                    <form method="post" action="{% url 'delete_document' doc.id %}" onsubmit="return confirm('Delete this document?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" style="padding:4px 10px; font-size:12px;">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="meta-sub">You haven't uploaded any documents yet.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

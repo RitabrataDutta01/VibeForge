@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
-from .forms import SignupForm, EmployeeProfileForm, AdminProfileForm, UserInfoForm
-from .models import Profile
+from .forms import SignupForm, EmployeeProfileForm, AdminProfileForm, UserInfoForm, EmployeeDocumentForm
+from .models import Profile, EmployeeDocument
 from django.contrib import messages
 import json
 from .services.gemini import ask_gemini
@@ -32,11 +32,11 @@ def signup_view(request):
                 email=form.cleaned_data['email'],
                 password=form.cleaned_data['password'],
             )
-            Profile.objects.create(
-                user=user,
-                role='EMPLOYEE',
-                employee_id=form.cleaned_data['employee_id'],
-            )
+            # Profile is auto-created by the post_save signal in signals.py,
+            # so just update it here instead of creating a second one.
+            user.profile.role = 'EMPLOYEE'
+            user.profile.employee_id = form.cleaned_data['employee_id']
+            user.profile.save()
             messages.success(request, f"Account created successfully for {user.username}.")
             return redirect('employee_list')
     else:
@@ -179,6 +179,7 @@ def employee_records_view(request):
     leave_records = None
     attendance_summary = None
     leave_summary = None
+    documents = None
     error = None
 
     if query_id:
@@ -206,6 +207,8 @@ def employee_records_view(request):
                 'total': all_leaves.count(),
             }
 
+            documents = target_profile.documents.all()
+
     return render(request, 'accounts/employee_records.html', {
         'query_id': query_id,
         'target_profile': target_profile,
@@ -213,6 +216,7 @@ def employee_records_view(request):
         'leave_records': leave_records,
         'attendance_summary': attendance_summary,
         'leave_summary': leave_summary,
+        'documents': documents,
         'error': error,
     })
 
@@ -238,28 +242,35 @@ def chatbot_reply_view(request):
 
 
 @login_required
-def upload_document(request):
-    if request.method == "POST":
-        form = EmployeeDocumentForm(
-            request.POST,
-            request.FILES
-        )
+def documents_view(request):
+    profile = request.user.profile
 
+    if request.method == 'POST':
+        form = EmployeeDocumentForm(request.POST, request.FILES)
         if form.is_valid():
             document = form.save(commit=False)
-            document.profile = request.user.profile
+            document.profile = profile
             document.save()
-
-            return redirect("profile")
-
+            messages.success(request, "Document uploaded successfully.")
+            return redirect('documents')
+        else:
+            messages.error(request, "Please fix the errors below and try again.")
     else:
         form = EmployeeDocumentForm()
 
-    return render(
-        request,
-        "accounts/upload_document.html",
-        {
-            "form": form
-        }
-    )
-    
+    return render(request, 'accounts/documents.html', {
+        'form': form,
+        'documents': profile.documents.all(),
+    })
+
+
+@login_required
+def delete_document_view(request, document_id):
+    document = get_object_or_404(EmployeeDocument, id=document_id, profile=request.user.profile)
+    if request.method == 'POST':
+        document.document.delete(save=False)
+        document.delete()
+        messages.success(request, "Document deleted.")
+    return redirect('documents')
+
+

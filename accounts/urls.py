@@ -14,4 +14,6 @@ urlpatterns = [
     path('employees/records/', views.employee_records_view, name='employee_records'),
     path('employees/<int:profile_id>/edit/', views.edit_employee_view, name='edit_employee'),
     path('chatbot/reply/', views.chatbot_reply_view, name='chatbot_reply'),
+    path('documents/', views.documents_view, name='documents'),
+    path('documents/<int:document_id>/delete/', views.delete_document_view, name='delete_document'),
 ]

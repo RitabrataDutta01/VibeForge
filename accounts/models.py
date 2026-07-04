@@ -34,3 +34,21 @@ DOCUMENT_TYPES = [
     ("OTHER", "Other"),
 ]
 
+
+class EmployeeDocument(models.Model):
+
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='documents')
+    document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPES)
+    document = models.FileField(upload_to='employee_documents/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-uploaded_at']
+
+    def __str__(self):
+        return f"{self.get_document_type_display()} – {self.profile.user.username}"
+
+    @property
+    def filename(self):
+        return self.document.name.rsplit('/', 1)[-1]
+
