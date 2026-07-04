@@ -1,4 +1,4 @@
-# VibeForge Hackathon
+# OdooxAdamas Hackathon
 
 ### Participants
 ---
