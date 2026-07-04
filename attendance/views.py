@@ -75,14 +75,14 @@ def attendance_home(request):
 
 @login_required
 def attendance_admin_roster(request):
-    if not request.user.is_staff:
+    if not (hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN'):
         messages.error(request, "You don't have access to this page.")
         return redirect("attendance:home")
 
     selected_date = request.GET.get("date", timezone.localdate().isoformat())
     d = date.fromisoformat(selected_date)
 
-    employees = User.objects.filter(is_staff=False)
+    employees = User.objects.filter(profile__role='EMPLOYEE')
     roster = []
     for emp in employees:
         record = Attendance.objects.filter(employee=emp, date=d).first()

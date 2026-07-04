@@ -40,7 +40,7 @@ def leave_home(request):
 
 @login_required
 def leave_admin_list(request):
-    if not request.user.is_staff:
+    if not (hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN'):
         messages.error(request, "You don't have access to this page.")
         return redirect("leaves:home")
 
@@ -57,7 +57,7 @@ def leave_admin_list(request):
 
 @login_required
 def leave_decide(request, leave_id, decision):
-    if not request.user.is_staff:
+    if not (hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN'):
         messages.error(request, "You don't have access to this page.")
         return redirect("leaves:home")
 
