@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+
 from pathlib import Path
+
+import os
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +30,9 @@ SECRET_KEY = 'django-insecure-rbasf^580lusqr6^crx*8p@07i+u)%d8i#yf3y&)duchdhgs)y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'suturally-apiculate-karima.ngrok-free.app'
+]
 
 
 # Application definition
@@ -39,6 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'accounts',
+    'attendance',
+    'leaves'
     
 ]
 
@@ -77,8 +86,12 @@ WSGI_APPLICATION = 'hrms.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'hrms_db',
+        'USER': 'hrms_user',
+        'PASSWORD': 'hackathon123',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -107,7 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -128,3 +141,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 LOGIN_URL = 'login'
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://suturally-apiculate-karima.ngrok-free.app",
+]

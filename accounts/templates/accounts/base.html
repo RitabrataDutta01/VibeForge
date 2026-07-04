@@ -7,6 +7,7 @@
     <title>{% block title %}HRMS{% endblock %}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
 </head>
 <body>
 
@@ -37,9 +38,14 @@
                 </li>
                 {% endif %}
 
-                {# <li class="nav-item"><a href="{% url 'attendance:home' %}"><i class="fa-regular fa-calendar-check"></i> Attendance</a></li> #}
-                {# <li class="nav-item"><a href="{% url 'leaves:home' %}"><i class="fa-solid fa-plane-departure"></i> Leave</a></li> #}
-                {# <li class="nav-item"><a href="{% url 'payroll:home' %}"><i class="fa-solid fa-wallet"></i> Payroll</a></li> #}
+                 <li class="nav-item {% if request.resolver_match.view_name == 'attendance:home' %}active{% endif %}"><a href="{% url 'attendance:home' %}"><i class="fa-regular fa-calendar-check"></i> Attendance</a></li> 
+                 <li class="nav-item {% if request.resolver_match.view_name == 'leaves:home' %}active{% endif %}"><a href="{% url 'leaves:home' %}"><i class="fa-solid fa-plane-departure"></i> Leave</a></li> 
+
+                {% if user.profile.role == 'ADMIN' %}
+                 <li class="nav-item {% if request.resolver_match.view_name == 'attendance:admin_roster' %}active{% endif %}"><a href="{% url 'attendance:admin_roster' %}"><i class="fa-solid fa-clipboard-user"></i> Team Attendance</a></li> 
+                 <li class="nav-item {% if request.resolver_match.view_name == 'leaves:admin_list' %}active{% endif %}"><a href="{% url 'leaves:admin_list' %}"><i class="fa-solid fa-clipboard-check"></i> Leave Approvals</a></li> 
+                {% endif %}
+                 {#<li class="nav-item"><a href="{% url 'payroll:home' %}"><i class="fa-solid fa-wallet"></i> Payroll</a></li>#} 
             </ul>
 
             <div class="user-profile-section">
@@ -62,6 +68,49 @@
     </div>
     {% else %}
         {% block auth_content %}{% endblock %}
+    {% endif %}
+
+    {% if user.is_authenticated and user.profile.role == 'ADMIN' %}
+    <button id="chatbot-launcher" class="chatbot__launcher" data-username="{{ user.first_name|default:user.username }}" aria-label="Open Ember, your HR assistant">
+        <span class="chatbot__pulse" aria-hidden="true"></span>
+        <img src="{% static 'img/vibeforge-mark.png' %}" alt="" class="chatbot__launcher-logo">
+    </button>
+
+    <div id="chatbot-panel" class="chatbot__panel card" role="dialog" aria-label="Ember, HR assistant">
+        <header class="chatbot__header">
+            <div class="chatbot__header-id">
+                <img src="{% static 'img/vibeforge-mark.png' %}" alt="Ember" class="chatbot__avatar-logo">
+                <div>
+                    <div class="chatbot__title">Ember</div>
+                    <div class="chatbot__subtitle">
+                        <span class="dot chatbot__status-dot"></span>
+                        <span id="chatbot-status">HR assistant · online</span>
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="chatbot-close" class="chatbot__close" aria-label="Close chat">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </header>
+
+        <div id="chatbot-messages" class="chatbot__messages"></div>
+
+        <div id="chatbot-suggestions" class="chatbot__suggestions">
+            <button type="button" class="chip chatbot__chip">Any pending leave requests?</button>
+            <button type="button" class="chip chatbot__chip">Who's absent today?</button>
+            <button type="button" class="chip chatbot__chip">Payroll status this month?</button>
+            <button type="button" class="chip chatbot__chip">When's the next holiday?</button>
+        </div>
+
+        <form id="chatbot-form" class="chatbot__input-row">
+            <input id="chatbot-input" class="form-control" type="text" placeholder="Ask Ember about approvals, attendance, payroll…" aria-label="Message Ember">
+            <button type="submit" id="chatbot-send" class="btn btn-primary chatbot__send" aria-label="Send message" disabled>
+                <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
+            </button>
+        </form>
+    </div>
+
+    <script src="{% static 'js/chatbot.js' %}"></script>
     {% endif %}
 
 </body>

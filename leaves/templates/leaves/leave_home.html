@@ -1,0 +1,82 @@
+{% extends "accounts/base.html" %}
+{% block title %}Leave{% endblock %}
+{% block content %}
+
+<div class="hdr">
+    <h1 style="font-size:22px; font-weight:700;">Leave Requests</h1>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="grid4">
+    <div class="card">
+        <div class="stat-label"><i class="fa-regular fa-hourglass-half"></i> Pending</div>
+        <div class="stat-val text-warning">{{ counts.pending }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label"><i class="fa-regular fa-circle-check"></i> Approved</div>
+        <div class="stat-val text-success">{{ counts.approved }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label"><i class="fa-regular fa-circle-xmark"></i> Rejected</div>
+        <div class="stat-val text-danger">{{ counts.rejected }}</div>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom:24px;">
+    <div class="section-title">Apply for Leave</div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Leave type</label>
+            <select name="leave_type">
+                <option value="Paid">Paid</option>
+                <option value="Sick">Sick</option>
+                <option value="Unpaid">Unpaid</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Start date</label>
+            <input type="date" name="start_date" required>
+        </div>
+        <div class="form-group">
+            <label>End date</label>
+            <input type="date" name="end_date" required>
+        </div>
+        <div class="form-group">
+            <label>Remarks</label>
+            <textarea name="remarks" rows="3"></textarea>
+        </div>
+        <button class="btn btn-primary" type="submit"><i class="fa-solid fa-paper-plane"></i> Submit Request</button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="section-title">Your Requests</div>
+    {% if requests %}
+    <table>
+        <thead>
+        <tr><th>Type</th><th>Start</th><th>End</th><th>Remarks</th><th>Status</th><th>HR Comment</th></tr>
+        </thead>
+        <tbody>
+        {% for r in requests %}
+        <tr>
+            <td>{{ r.leave_type }}</td>
+            <td>{{ r.start_date }}</td>
+            <td>{{ r.end_date }}</td>
+            <td>{{ r.remarks|default:"—" }}</td>
+            <td><span class="badge badge-{{ r.status|lower }}">{{ r.status }}</span></td>
+            <td>{{ r.comment|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align:center; color:var(--text-muted); padding:2rem 0;">No leave requests yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "accounts/base.html" %}
+{% block title %}Team Attendance{% endblock %}
+{% block content %}
+
+<div class="hdr">
+    <h1 style="font-size:22px; font-weight:700;">Team Attendance</h1>
+    <form method="get" style="display:flex; gap:8px;">
+        <input type="date" name="date" value="{{ selected_date }}" class="form-control" style="width:auto;">
+        <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> View</button>
+    </form>
+</div>
+
+<div class="grid4">
+    <div class="card">
+        <div class="stat-label"><i class="fa-solid fa-users"></i> Total Employees</div>
+        <div class="stat-val">{{ roster|length }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label"><i class="fa-regular fa-circle-check"></i> Present</div>
+        <div class="stat-val text-success">{{ counts.Present|default:0 }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label"><i class="fa-regular fa-circle-xmark"></i> Absent</div>
+        <div class="stat-val text-danger">{{ counts.Absent|default:0 }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label"><i class="fa-solid fa-plane-departure"></i> On Leave</div>
+        <div class="stat-val" style="color: var(--text-pro);">{{ counts.Leave|default:0 }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="section-title">Roster for {{ selected_date }}</div>
+    <table>
+        <thead>
+        <tr><th>Employee</th><th>Status</th><th>Check-in</th><th>Check-out</th></tr>
+        </thead>
+        <tbody>
+        {% for row in roster %}
+        <tr>
+            <td>
+                <div class="row" style="border:none; padding:0;">
+                    <div class="avatar av-a">{{ row.employee.username|first|upper }}</div>
+                    {{ row.employee.username }}
+                </div>
+            </td>
+            <td><span class="badge badge-{{ row.status|lower }}">{{ row.status }}</span></td>
+            <td>{{ row.check_in|date:"H:i"|default:"—" }}</td>
+            <td>{{ row.check_out|date:"H:i"|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No employees found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
