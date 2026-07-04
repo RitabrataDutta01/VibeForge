@@ -1,0 +1,83 @@
+{% extends "accounts/base.html" %}
+{% block title %}My Payroll{% endblock %}
+{% block content %}
+
+<div class="hdr">
+    <h1 style="font-size:22px; font-weight:700;">My Payroll</h1>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="card" style="margin-bottom:24px;">
+    <div class="section-title">Active Salary Structure</div>
+
+    {% if structure %}
+    <div style="display:flex; flex-direction:column; gap:14px;">
+        <div style="display:flex; justify-content:space-between; font-size:14px;">
+            <span style="color:var(--text-secondary);">Base Salary:</span>
+            <span style="font-weight:600; font-family:monospace;">₹{{ structure.base_salary }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:14px;">
+            <span style="color:var(--text-secondary);">Allowances:</span>
+            <span style="font-weight:600; color:var(--text-success); font-family:monospace;">+ ₹{{ structure.allowances }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:14px;">
+            <span style="color:var(--text-secondary);">Deductions / Taxes:</span>
+            <span style="font-weight:600; color:var(--text-danger); font-family:monospace;">- ₹{{ structure.deductions }}</span>
+        </div>
+        <div style="border-top:1px solid var(--border); padding-top:14px; margin-top:6px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:600; font-size:15px;">Net Salary:</span>
+            <span style="font-size:24px; font-weight:700; color:var(--text-accent); font-family:monospace;">₹{{ structure.net_salary }}</span>
+        </div>
+    </div>
+    {% else %}
+    <div style="text-align:center; padding:12px; color:var(--text-muted); font-size:14px;">
+        Salary structure has not been set up by HR yet.
+    </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="section-title">Payslip History</div>
+    <table>
+        <thead>
+        <tr>
+            <th>Pay Period</th>
+            <th>Base Salary</th>
+            <th>Allowances</th>
+            <th>Deductions</th>
+            <th>Net Payout</th>
+            <th>Status</th>
+            <th>Release Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for slip in payslips %}
+        <tr>
+            <td style="font-weight:600;">Month {{ slip.month }}, {{ slip.year }}</td>
+            <td style="font-family:monospace;">₹{{ slip.base_salary }}</td>
+            <td style="font-family:monospace; color:var(--text-success);">+₹{{ slip.allowances }}</td>
+            <td style="font-family:monospace; color:var(--text-danger);">-₹{{ slip.deductions }}</td>
+            <td style="font-family:monospace; font-weight:700; color:var(--text-accent);">₹{{ slip.net_salary }}</td>
+            <td>
+                <span class="badge {% if slip.status == 'paid' %}badge-approved{% else %}badge-pending{% endif %}">
+                    {{ slip.get_status_display }}
+                </span>
+            </td>
+            <td>
+                {% if slip.paid_date %}{{ slip.paid_date|date:"F d, Y" }}{% else %}—{% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" style="text-align:center; padding:24px; color:var(--text-muted); font-size:13px;">No payslips generated for your profile yet.</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

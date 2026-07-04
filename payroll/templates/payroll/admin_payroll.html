@@ -1,0 +1,169 @@
+{% extends "accounts/base.html" %}
+{% block title %}Payroll Management{% endblock %}
+{% block content %}
+
+<div class="hdr">
+    <h1 style="font-size:22px; font-weight:700;">Payroll Control Console</h1>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="grid2" style="align-items:start; margin-bottom:24px;">
+    <div class="card">
+        <div class="section-title">Generate Monthly Payslips</div>
+        <form method="post" action="{% url 'payroll:admin_generate_payslip' %}" style="display:flex; flex-direction:column; gap:12px;">
+            {% csrf_token %}
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="id_month">Pay Month</label>
+                    <select id="id_month" name="month" class="form-control">
+                        <option value="1" {% if current_month == 1 %}selected{% endif %}>January</option>
+                        <option value="2" {% if current_month == 2 %}selected{% endif %}>February</option>
+                        <option value="3" {% if current_month == 3 %}selected{% endif %}>March</option>
+                        <option value="4" {% if current_month == 4 %}selected{% endif %}>April</option>
+                        <option value="5" {% if current_month == 5 %}selected{% endif %}>May</option>
+                        <option value="6" {% if current_month == 6 %}selected{% endif %}>June</option>
+                        <option value="7" {% if current_month == 7 %}selected{% endif %}>July</option>
+                        <option value="8" {% if current_month == 8 %}selected{% endif %}>August</option>
+                        <option value="9" {% if current_month == 9 %}selected{% endif %}>September</option>
+                        <option value="10" {% if current_month == 10 %}selected{% endif %}>October</option>
+                        <option value="11" {% if current_month == 11 %}selected{% endif %}>November</option>
+                        <option value="12" {% if current_month == 12 %}selected{% endif %}>December</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="id_year">Pay Year</label>
+                    <input type="number" id="id_year" name="year" value="{{ current_year }}" class="form-control" required>
+                </div>
+            </div>
+            <p style="font-size:11px; color:var(--text-muted); line-height:1.4;">
+                Generates payslips for all non-admin employees for the selected month/year. Already-generated payslips are skipped.
+            </p>
+            <button type="submit" class="btn btn-primary" style="justify-content:center;">
+                <i class="fa-solid fa-calculator"></i> Run Payslip Generation
+            </button>
+        </form>
+    </div>
+
+    <div class="card">
+        <div class="section-title">Overview</div>
+        <div style="display:flex; flex-direction:column; gap:16px; padding:8px 0;">
+            <div>
+                <div style="font-size:12px; color:var(--text-muted); font-weight:500;">Employee profiles</div>
+                <div style="font-size:26px; font-weight:700; color:var(--text-primary);">{{ profiles.count }}</div>
+            </div>
+            <div>
+                <div style="font-size:12px; color:var(--text-muted); font-weight:500;">Payslips on record</div>
+                <div style="font-size:26px; font-weight:700; color:var(--text-accent);">{{ payslips.count }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom:24px;">
+    <div class="section-title">Employee Salary Structures</div>
+    <table>
+        <thead>
+        <tr>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Base Salary</th>
+            <th>Allowances</th>
+            <th>Deductions</th>
+            <th>Net Salary</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for profile in profiles %}
+        <tr>
+            <td style="font-family:monospace; font-weight:600; color:var(--text-accent);">{{ profile.employee_id }}</td>
+            <td>
+                <div class="row" style="border:none; padding:0;">
+                    <div class="avatar av-a">{{ profile.user.username|first|upper }}</div>
+                    <div>
+                        <div style="font-size:13px; font-weight:600;">{{ profile.user.username }}</div>
+                        <div style="font-size:11px; color:var(--text-muted);">{{ profile.job_title|default:"Staff" }}</div>
+                    </div>
+                </div>
+            </td>
+            <td style="font-family:monospace;">₹{{ profile.user.salary_structure.base_salary|default:"0.00" }}</td>
+            <td style="font-family:monospace; color:var(--text-success);">+₹{{ profile.user.salary_structure.allowances|default:"0.00" }}</td>
+            <td style="font-family:monospace; color:var(--text-danger);">-₹{{ profile.user.salary_structure.deductions|default:"0.00" }}</td>
+            <td style="font-family:monospace; font-weight:700; color:var(--text-accent);">₹{{ profile.user.salary_structure.net_salary|default:"0.00" }}</td>
+            <td>
+                <a href="{% url 'payroll:admin_update_salary' employee_id=profile.employee_id %}" class="btn">
+                    <i class="fa-solid fa-pen"></i> Edit
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">No employee profiles found.</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <div class="section-title">Recent Payslips</div>
+    <table>
+        <thead>
+        <tr>
+            <th>Employee</th>
+            <th>Pay Period</th>
+            <th>Breakdown</th>
+            <th>Net Payout</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for slip in payslips %}
+        <tr>
+            <td>
+                <div class="row" style="border:none; padding:0;">
+                    <div class="avatar av-a">{{ slip.user.username|first|upper }}</div>
+                    <div>
+                        <div style="font-size:13px; font-weight:500;">{{ slip.user.username }}</div>
+                        <div style="font-size:11px; color:var(--text-muted);">{{ slip.user.profile.employee_id }}</div>
+                    </div>
+                </div>
+            </td>
+            <td style="font-weight:500; font-size:13px;">Month {{ slip.month }}, {{ slip.year }}</td>
+            <td style="font-size:12px; color:var(--text-secondary);">
+                Base: <span style="font-family:monospace;">₹{{ slip.base_salary }}</span> |
+                All: <span style="font-family:monospace; color:var(--text-success);">+₹{{ slip.allowances }}</span> |
+                Ded: <span style="font-family:monospace; color:var(--text-danger);">-₹{{ slip.deductions }}</span>
+            </td>
+            <td style="font-family:monospace; font-weight:700; color:var(--text-accent);">₹{{ slip.net_salary }}</td>
+            <td>
+                <span class="badge {% if slip.status == 'paid' %}badge-approved{% else %}badge-pending{% endif %}">
+                    {{ slip.get_status_display }}
+                </span>
+            </td>
+            <td>
+                {% if slip.status == 'unpaid' %}
+                <form method="post" action="{% url 'payroll:admin_pay_payslip' payslip_id=slip.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-success" type="submit"><i class="fa-solid fa-check"></i> Release Pay</button>
+                </form>
+                {% else %}
+                <span style="font-size:12px; color:var(--text-muted);">Paid {{ slip.paid_date|date:"M d" }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">No payslips generated yet.</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

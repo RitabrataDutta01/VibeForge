@@ -1,0 +1,60 @@
+{% extends "accounts/base.html" %}
+{% block title %}Update Salary - {{ profile.user.username }}{% endblock %}
+{% block content %}
+
+<div class="hdr">
+    <h1 style="font-size:22px; font-weight:700;">Update Salary Structure</h1>
+    <a href="{% url 'payroll:admin_payroll' %}" class="btn">
+        <i class="fa-solid fa-arrow-left"></i> Back to Payroll
+    </a>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="card" style="max-width:500px; margin:0 auto;">
+    <div class="row" style="border:none; padding:0 0 16px 0; margin-bottom:16px; border-bottom:1px solid var(--border);">
+        <div class="avatar av-a">{{ profile.user.username|first|upper }}</div>
+        <div>
+            <div style="font-size:15px; font-weight:600;">{{ profile.user.username }}</div>
+            <div style="font-size:12px; color:var(--text-muted);">{{ profile.job_title|default:"Staff" }} &middot; {{ profile.department|default:"—" }}</div>
+        </div>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="{{ form.base_salary.id_for_label }}">Base Salary (₹)</label>
+            {{ form.base_salary }}
+            {% if form.base_salary.errors %}
+                <div class="text-danger" style="font-size:12px; margin-top:4px;">{{ form.base_salary.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.allowances.id_for_label }}">Allowances (₹)</label>
+            {{ form.allowances }}
+            {% if form.allowances.errors %}
+                <div class="text-danger" style="font-size:12px; margin-top:4px;">{{ form.allowances.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group" style="margin-bottom:24px;">
+            <label for="{{ form.deductions.id_for_label }}">Deductions & Taxes (₹)</label>
+            {{ form.deductions }}
+            {% if form.deductions.errors %}
+                <div class="text-danger" style="font-size:12px; margin-top:4px;">{{ form.deductions.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:flex-end;">
+            <a href="{% url 'payroll:admin_payroll' %}" class="btn">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Structure</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
