@@ -22,3 +22,15 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} ({self.role})"
+
+
+DOCUMENT_TYPES = [
+    ("RESUME", "Resume"),
+    ("AADHAAR", "Aadhaar"),
+    ("PAN", "PAN Card"),
+    ("DEGREE", "Degree Certificate"),
+    ("OFFER", "Offer Letter"),
+    ("EXPERIENCE", "Experience Certificate"),
+    ("OTHER", "Other"),
+]
+

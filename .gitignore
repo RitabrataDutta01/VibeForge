@@ -1,2 +1,7 @@
 .git
 .python-version
+
+*.sqlite3
+__pycache__
+*.png
+.venv

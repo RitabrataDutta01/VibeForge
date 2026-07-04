@@ -9,6 +9,9 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
+    path('settings/', views.settings_view, name='settings'),
     path('employees/', views.employee_list_view, name='employee_list'),
+    path('employees/records/', views.employee_records_view, name='employee_records'),
     path('employees/<int:profile_id>/edit/', views.edit_employee_view, name='edit_employee'),
+    path('chatbot/reply/', views.chatbot_reply_view, name='chatbot_reply'),
 ]

@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     
     'accounts',
     'attendance',
-    'leaves'
+    'leaves',
+    'payroll',
     
 ]
 

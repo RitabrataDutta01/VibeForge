@@ -317,6 +317,40 @@ a:hover {
 .badge-employee { background: var(--bg-accent); color: var(--text-accent); }
 .badge-admin { background: var(--bg-danger); color: var(--text-danger); }
 
+/* Read-only profile detail grid (used on dashboards, records, settings) */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
+}
+
+.detail-item .detail-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.detail-item .detail-value {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 600;
+  word-break: break-word;
+}
+
+/* Inline search bar (employee records lookup) */
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.search-bar input[type="text"] {
+  max-width: 320px;
+}
+
 .bar-wrap {
   background: var(--surface-2);
   border-radius: 99px;
@@ -467,6 +501,32 @@ input[type="file"] {
   font-size: 13px;
 }
 
+/* Native date/time inputs: tell the browser to render its built-in
+   picker UI (icon + popup calendar) in dark mode so it matches the app */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.65;
+  border-radius: 4px;
+  padding: 2px;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background-color: var(--surface-2);
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -575,3 +635,54 @@ tr:hover td {
 .calendar-day.marker-leave .day-marker { background-color: var(--text-pro); }
 .calendar-day.marker-half-day .day-marker { background-color: var(--text-accent); }
 .calendar-day.marker-weekend { color: var(--text-muted); opacity: 0.6; }
+
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+.page-header h1 {
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.page-header p {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.upload-card {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.upload-card .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.upload-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.help-text {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.form-group ul.errorlist {
+    list-style: none;
+    margin-top: 6px;
+    color: var(--text-danger);
+    font-size: 13px;
+}
+
+.form-group ul.errorlist li {
+    margin-top: 4px;
+}

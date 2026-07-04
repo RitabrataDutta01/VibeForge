@@ -4,7 +4,10 @@
 
 <div class="hdr">
     <h1 style="font-size:22px; font-weight:700;">All Employees</h1>
-    <a href="{% url 'create_employee' %}" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Add Employee</a>
+    <div style="display:flex; gap:12px;">
+        <a href="{% url 'employee_records' %}" class="btn"><i class="fa-solid fa-magnifying-glass"></i> Search Records</a>
+        <a href="{% url 'create_employee' %}" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Add Employee</a>
+    </div>
 </div>
 
 <div class="card">
@@ -31,7 +34,10 @@
                 <td>{{ profile.employee_id }}</td>
                 <td>{{ profile.department|default:"—" }}</td>
                 <td><span class="badge badge-{{ profile.role|lower }}">{{ profile.role }}</span></td>
-                <td><a href="{% url 'edit_employee' profile.id %}" class="btn">Edit <i class="fa-solid fa-arrow-right"></i></a></td>
+                <td style="display:flex; gap:8px;">
+                    <a href="{% url 'employee_records' %}?employee_id={{ profile.employee_id }}" class="btn"><i class="fa-solid fa-clipboard-list"></i> Records</a>
+                    <a href="{% url 'edit_employee' profile.id %}" class="btn">Edit <i class="fa-solid fa-arrow-right"></i></a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

@@ -28,6 +28,9 @@
                 <li class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                     <a href="{% url 'profile' %}"><i class="fa-regular fa-user"></i> My Profile</a>
                 </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                    <a href="{% url 'settings' %}"><i class="fa-solid fa-gear"></i> Settings</a>
+                </li>
 
                 {% if user.profile.role == 'ADMIN' %}
                 <li class="nav-item {% if request.resolver_match.url_name == 'employee_list' %}active{% endif %}">
@@ -36,14 +39,19 @@
                 <li class="nav-item {% if request.resolver_match.url_name == 'create_employee' %}active{% endif %}">
                     <a href="{% url 'create_employee' %}"><i class="fa-solid fa-user-plus"></i> Add Employee</a>
                 </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'employee_records' %}active{% endif %}">
+                    <a href="{% url 'employee_records' %}"><i class="fa-solid fa-magnifying-glass"></i> Employee Records</a>
+                </li>
                 {% endif %}
 
                  <li class="nav-item {% if request.resolver_match.view_name == 'attendance:home' %}active{% endif %}"><a href="{% url 'attendance:home' %}"><i class="fa-regular fa-calendar-check"></i> Attendance</a></li> 
                  <li class="nav-item {% if request.resolver_match.view_name == 'leaves:home' %}active{% endif %}"><a href="{% url 'leaves:home' %}"><i class="fa-solid fa-plane-departure"></i> Leave</a></li> 
+                 <li class="nav-item {% if request.resolver_match.view_name == 'payroll:home' %}active{% endif %}"><a href="{% url 'payroll:home' %}"><i class="fa-solid fa-wallet"></i> Payroll</a></li>
 
                 {% if user.profile.role == 'ADMIN' %}
                  <li class="nav-item {% if request.resolver_match.view_name == 'attendance:admin_roster' %}active{% endif %}"><a href="{% url 'attendance:admin_roster' %}"><i class="fa-solid fa-clipboard-user"></i> Team Attendance</a></li> 
                  <li class="nav-item {% if request.resolver_match.view_name == 'leaves:admin_list' %}active{% endif %}"><a href="{% url 'leaves:admin_list' %}"><i class="fa-solid fa-clipboard-check"></i> Leave Approvals</a></li> 
+                 <li class="nav-item {% if request.resolver_match.view_name == 'payroll:admin_payroll' %}active{% endif %}"><a href="{% url 'payroll:admin_payroll' %}"><i class="fa-solid fa-money-check-dollar"></i> Payroll Management</a></li>
                 {% endif %}
                  {#<li class="nav-item"><a href="{% url 'payroll:home' %}"><i class="fa-solid fa-wallet"></i> Payroll</a></li>#} 
             </ul>
@@ -103,6 +111,7 @@
         </div>
 
         <form id="chatbot-form" class="chatbot__input-row">
+            {% csrf_token %}
             <input id="chatbot-input" class="form-control" type="text" placeholder="Ask Ember about approvals, attendance, payroll…" aria-label="Message Ember">
             <button type="submit" id="chatbot-send" class="btn btn-primary chatbot__send" aria-label="Send message" disabled>
                 <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>

@@ -1,0 +1,147 @@
+{% extends "accounts/base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+
+<div class="hdr">
+    <div>
+        <h1 style="font-size:22px; font-weight:700;">Welcome back, {{ profile.user.first_name|default:profile.user.username }}</h1>
+        <div class="meta-sub" style="margin-top:4px;">{{ today|date:"l, F j, Y" }}</div>
+    </div>
+    {% if profile.profile_pic %}
+        <img src="{{ profile.profile_pic.url }}" alt="{{ profile.user.username }}" style="width:52px; height:52px; border-radius:50%; object-fit:cover;">
+    {% else %}
+        <div class="avatar av-a" style="width:52px; height:52px; font-size:18px;">{{ profile.user.username|first|upper }}</div>
+    {% endif %}
+</div>
+
+<div class="card" style="margin-bottom:24px;">
+    <div class="hdr" style="margin-bottom:16px;">
+        <div class="row" style="border-bottom:none; padding:0;">
+            {% if profile.profile_pic %}
+                <img src="{{ profile.profile_pic.url }}" alt="{{ profile.user.username }}" style="width:48px; height:48px; border-radius:50%; object-fit:cover;">
+            {% else %}
+                <div class="avatar av-a" style="width:48px; height:48px; font-size:16px;">{{ profile.user.username|first|upper }}</div>
+            {% endif %}
+            <div class="meta">
+                <div class="meta-name" style="font-size:16px;">
+                    {{ profile.user.get_full_name|default:profile.user.username }}
+                    <span class="badge badge-{{ profile.role|lower }}">{{ profile.role }}</span>
+                </div>
+                <div class="meta-sub">@{{ profile.user.username }}</div>
+            </div>
+        </div>
+        <a href="{% url 'settings' %}" class="btn"><i class="fa-solid fa-gear"></i> Settings</a>
+    </div>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <div class="detail-label">Employee ID</div>
+            <div class="detail-value">{{ profile.employee_id }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Department</div>
+            <div class="detail-value">{{ profile.department|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Job Title</div>
+            <div class="detail-value">{{ profile.job_title|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Email</div>
+            <div class="detail-value">{{ profile.user.email|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Phone</div>
+            <div class="detail-value">{{ profile.phone|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Address</div>
+            <div class="detail-value">{{ profile.address|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Joined</div>
+            <div class="detail-value">{{ profile.user.date_joined|date:"M j, Y" }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="grid4">
+    <div class="card">
+        <div class="stat-label"><i class="fa-solid fa-users"></i> Total Employees</div>
+        <div class="stat-val">{{ total_employees }}</div>
+        <div class="stat-sub">Active in the system</div>
+    </div>
+    <div class="card">
+        <div class="stat-label"><i class="fa-regular fa-calendar-check"></i> Present Today</div>
+        <div class="stat-val text-success">{{ present_today }}<span style="font-size:16px; color:var(--text-muted); font-weight:600;"> / {{ total_employees }}</span></div>
+        <div class="stat-sub">{{ absent_today }} absent · {{ half_day_today }} half-day · {{ leave_today }} on leave</div>
+    </div>
+    <div class="card">
+        <div class="stat-label"><i class="fa-solid fa-plane-departure"></i> Pending Leave Approvals</div>
+        <div class="stat-val{% if pending_leaves_count > 0 %} text-warning{% endif %}">{{ pending_leaves_count }}</div>
+        <div class="stat-sub">Awaiting your decision</div>
+    </div>
+    <div class="card">
+        <div class="stat-label"><i class="fa-solid fa-wallet"></i> Unpaid Payslips</div>
+        <div class="stat-val{% if unpaid_payslips > 0 %} text-danger{% endif %}">{{ unpaid_payslips }}</div>
+        <div class="stat-sub">{{ payslips_this_month }} generated this month</div>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom:24px;">
+    <div class="section-title">Quick Links</div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="{% url 'employee_list' %}" class="btn"><i class="fa-solid fa-users"></i> Employees</a>
+        <a href="{% url 'create_employee' %}" class="btn"><i class="fa-solid fa-user-plus"></i> Add Employee</a>
+        <a href="{% url 'employee_records' %}" class="btn"><i class="fa-solid fa-magnifying-glass"></i> Employee Records</a>
+        <a href="{% url 'attendance:admin_roster' %}" class="btn"><i class="fa-solid fa-clipboard-user"></i> Team Attendance</a>
+        <a href="{% url 'leaves:admin_list' %}" class="btn"><i class="fa-solid fa-clipboard-check"></i> Leave Approvals</a>
+        <a href="{% url 'payroll:admin_payroll' %}" class="btn"><i class="fa-solid fa-money-check-dollar"></i> Payroll Management</a>
+    </div>
+</div>
+
+<div class="grid2">
+    <div class="card">
+        <div class="section-title">
+            <span>Pending Leave Requests</span>
+            <a href="{% url 'leaves:admin_list' %}" style="font-size:12px; text-transform:none; font-weight:500;">View all &rarr;</a>
+        </div>
+        {% if recent_pending_leaves %}
+            {% for leave in recent_pending_leaves %}
+            <div class="row">
+                <div class="avatar av-w">{{ leave.employee.username|first|upper }}</div>
+                <div class="meta">
+                    <div class="meta-name">{{ leave.employee.username }} <span class="badge badge-pending">{{ leave.leave_type }}</span></div>
+                    <div class="meta-sub">{{ leave.start_date|date:"M j" }} – {{ leave.end_date|date:"M j, Y" }} · applied {{ leave.applied_at|timesince }} ago</div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="meta-sub">No pending leave requests. You're all caught up.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="section-title">
+            <span>Today's Attendance</span>
+            <a href="{% url 'attendance:admin_roster' %}" style="font-size:12px; text-transform:none; font-weight:500;">View roster &rarr;</a>
+        </div>
+        <div class="row">
+            <div class="meta"><div class="meta-name">Present</div></div>
+            <div style="font-weight:700; color:var(--text-success);">{{ present_today }}</div>
+        </div>
+        <div class="row">
+            <div class="meta"><div class="meta-name">Absent</div></div>
+            <div style="font-weight:700; color:var(--text-danger);">{{ absent_today }}</div>
+        </div>
+        <div class="row">
+            <div class="meta"><div class="meta-name">Half-day</div></div>
+            <div style="font-weight:700; color:var(--text-accent);">{{ half_day_today }}</div>
+        </div>
+        <div class="row" style="border-bottom:none;">
+            <div class="meta"><div class="meta-name">On Leave</div></div>
+            <div style="font-weight:700; color:var(--text-pro);">{{ leave_today }}</div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

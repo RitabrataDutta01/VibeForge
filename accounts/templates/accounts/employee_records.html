@@ -1,0 +1,158 @@
+{% extends "accounts/base.html" %}
+{% block title %}Employee Records{% endblock %}
+{% block content %}
+
+<div class="hdr">
+    <h1 style="font-size:22px; font-weight:700;">Employee Records</h1>
+</div>
+
+<div class="card" style="margin-bottom:24px;">
+    <div class="section-title">Search by Employee ID</div>
+    <form method="get" class="search-bar">
+        <input type="text" name="employee_id" value="{{ query_id }}" placeholder="e.g. EMP-1024" class="form-control" autofocus>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+    </form>
+</div>
+
+{% if error %}
+<div class="card" style="margin-bottom:24px;">
+    <p class="meta-sub" style="font-size:14px;">{{ error }}</p>
+</div>
+{% endif %}
+
+{% if target_profile %}
+<div class="card" style="margin-bottom:24px;">
+    <div class="hdr" style="margin-bottom:16px;">
+        <div class="row" style="border-bottom:none; padding:0;">
+            {% if target_profile.profile_pic %}
+                <img src="{{ target_profile.profile_pic.url }}" alt="{{ target_profile.user.username }}" style="width:48px; height:48px; border-radius:50%; object-fit:cover;">
+            {% else %}
+                <div class="avatar av-a" style="width:48px; height:48px; font-size:16px;">{{ target_profile.user.username|first|upper }}</div>
+            {% endif %}
+            <div class="meta">
+                <div class="meta-name" style="font-size:16px;">
+                    {{ target_profile.user.get_full_name|default:target_profile.user.username }}
+                    <span class="badge badge-{{ target_profile.role|lower }}">{{ target_profile.role }}</span>
+                </div>
+                <div class="meta-sub">@{{ target_profile.user.username }}</div>
+            </div>
+        </div>
+        <a href="{% url 'edit_employee' target_profile.id %}" class="btn"><i class="fa-solid fa-pen"></i> Edit Profile</a>
+    </div>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <div class="detail-label">Employee ID</div>
+            <div class="detail-value">{{ target_profile.employee_id }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Department</div>
+            <div class="detail-value">{{ target_profile.department|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Job Title</div>
+            <div class="detail-value">{{ target_profile.job_title|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Email</div>
+            <div class="detail-value">{{ target_profile.user.email|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Phone</div>
+            <div class="detail-value">{{ target_profile.phone|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Address</div>
+            <div class="detail-value">{{ target_profile.address|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Joined</div>
+            <div class="detail-value">{{ target_profile.user.date_joined|date:"M j, Y" }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="grid4">
+    <div class="card">
+        <div class="stat-label"><i class="fa-regular fa-calendar-check"></i> Present</div>
+        <div class="stat-val text-success">{{ attendance_summary.present }}</div>
+        <div class="stat-sub">out of {{ attendance_summary.total }} recorded days</div>
+    </div>
+    <div class="card">
+        <div class="stat-label"><i class="fa-solid fa-calendar-xmark"></i> Absent</div>
+        <div class="stat-val text-danger">{{ attendance_summary.absent }}</div>
+        <div class="stat-sub">{{ attendance_summary.half_day }} half-day · {{ attendance_summary.leave }} on leave</div>
+    </div>
+    <div class="card">
+        <div class="stat-label"><i class="fa-solid fa-plane-departure"></i> Leave Requests</div>
+        <div class="stat-val{% if leave_summary.pending > 0 %} text-warning{% endif %}">{{ leave_summary.total }}</div>
+        <div class="stat-sub">{{ leave_summary.pending }} pending</div>
+    </div>
+    <div class="card">
+        <div class="stat-label"><i class="fa-solid fa-circle-check"></i> Leave Outcomes</div>
+        <div class="stat-val text-success">{{ leave_summary.approved }}<span style="font-size:14px; color:var(--text-muted); font-weight:500;"> approved</span></div>
+        <div class="stat-sub">{{ leave_summary.rejected }} rejected</div>
+    </div>
+</div>
+
+<div class="grid2">
+    <div class="card">
+        <div class="section-title">Attendance History</div>
+        {% if attendance_records %}
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Check In</th>
+                    <th scope="col">Check Out</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in attendance_records %}
+                <tr>
+                    <td>{{ record.date|date:"M j, Y" }}</td>
+                    <td><span class="badge badge-{{ record.status|lower }}">{{ record.status }}</span></td>
+                    <td>{% if record.check_in %}{{ record.check_in|time:"g:i A" }}{% else %}—{% endif %}</td>
+                    <td>{% if record.check_out %}{{ record.check_out|time:"g:i A" }}{% else %}—{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p class="meta-sub">No attendance records found for this employee.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="section-title">Leave History</div>
+        {% if leave_records %}
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Dates</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for leave in leave_records %}
+                <tr>
+                    <td>{{ leave.leave_type }}</td>
+                    <td>{{ leave.start_date|date:"M j" }} – {{ leave.end_date|date:"M j, Y" }}</td>
+                    <td><span class="badge badge-{{ leave.status|lower }}">{{ leave.status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p class="meta-sub">No leave requests found for this employee.</p>
+        {% endif %}
+    </div>
+</div>
+{% elif not error %}
+<div class="card">
+    <p class="meta-sub" style="text-align:center; padding:2rem 0;">Enter an Employee ID above to view their attendance and leave history.</p>
+</div>
+{% endif %}
+
+{% endblock %}

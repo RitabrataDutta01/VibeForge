@@ -27,6 +27,31 @@
     </div>
 </div>
 
+{% if payroll_summary %}
+<div class="card" style="margin-bottom:24px;">
+    <div class="hdr" style="margin-bottom:12px;">
+        <div class="section-title" style="margin-bottom:0;">Payroll Overview</div>
+        <a href="{% url 'payroll:admin_payroll' %}" class="btn">
+            <i class="fa-solid fa-money-check-dollar"></i> Manage Payroll
+        </a>
+    </div>
+    <div class="grid4">
+        <div>
+            <div class="stat-label">Salary Structures Set</div>
+            <div class="stat-val">{{ payroll_summary.structures_configured }}</div>
+        </div>
+        <div>
+            <div class="stat-label">Unpaid Payslips</div>
+            <div class="stat-val" style="color:var(--text-warning);">{{ payroll_summary.unpaid_payslips }}</div>
+        </div>
+        <div>
+            <div class="stat-label">Paid This Month</div>
+            <div class="stat-val" style="color:var(--text-success);">{{ payroll_summary.paid_this_month }}</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="card">
     <div class="section-title">Edit Profile</div>
     <form method="post" enctype="multipart/form-data" novalidate>

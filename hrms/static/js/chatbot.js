@@ -1,57 +1,30 @@
-
 (function () {
-  var RULES = [
-    {
-      keywords: ['pending leave', 'pending request', 'leave approvals', 'awaiting approval'],
-      reply: "There are 6 leave requests awaiting your review — 4 Paid, 1 Sick, 1 Unpaid. Want me to open the approvals queue?",
-    },
-    {
-      keywords: ['approve', 'reject', 'decision on'],
-      reply: "I can pull up any request by employee name so you can approve or reject it with a comment. Who would you like to review first?",
-    },
-    {
-      keywords: ['attendance today', 'who is absent', 'absentees', 'checked in today', 'team attendance'],
-      reply: "Today: 42 checked in, 3 on approved leave, 2 absent without a request — Rohit Sen and Priya Nair. Want their contact details?",
-    },
-    {
-      keywords: ['attendance summary', 'monthly attendance', 'attendance report'],
-      reply: "This month's average attendance across the team is 94%. Engineering is highest at 97%, Sales is lowest at 88%.",
-    },
-    {
-      keywords: ['payroll', 'salary', 'payslip', 'ctc', 'update salary', 'salary structure'],
-      reply: "Payroll for June has been processed for all 47 employees. To update a salary structure, tell me the employee's name and the new figures.",
-    },
-    {
-      keywords: ['new employee', 'onboard', 'add employee', 'employee list'],
-      reply: "There are 47 active employees, with 2 pending onboarding — their documents are still under verification. Want the full list?",
-    },
-    {
-      keywords: ['holiday', 'holidays', 'public holiday'],
-      reply: "The next company holiday is Independence Day on Aug 15th. Want to publish it to the team calendar?",
-    },
-    {
-      keywords: ['hello', 'hi', 'hey'],
-      reply: "Hey — I'm Ember, your HR assistant. Ask me about approvals, attendance, or payroll for the team.",
-    },
-    {
-      keywords: ['thank', 'thanks'],
-      reply: "Anytime — that's what I'm here for. \uD83C\uDF3F",
-    },
-  ];
+  var FALLBACK = "Sorry, I couldn't process that. Please try again.";
 
-  var FALLBACK = "I don't have an answer for that yet. Try asking about pending approvals, team attendance, or payroll.";
+  function getCsrfToken() {
+    var input = document.querySelector('#chatbot-form input[name=csrfmiddlewaretoken]');
+    return input ? input.value : '';
+  }
 
-  function getReply(message) {
-    var text = message.toLowerCase();
-    for (var i = 0; i < RULES.length; i++) {
-      var rule = RULES[i];
-      for (var j = 0; j < rule.keywords.length; j++) {
-        if (text.indexOf(rule.keywords[j]) !== -1) {
-          return rule.reply;
-        }
-      }
-    }
-    return FALLBACK;
+  function fetchReply(message) {
+    return fetch('/chatbot/reply/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken(),
+      },
+      body: JSON.stringify({ message: message }),
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Request failed');
+        return res.json();
+      })
+      .then(function (data) {
+        return data.reply || FALLBACK;
+      })
+      .catch(function () {
+        return FALLBACK;
+      });
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -110,12 +83,11 @@
       input.value = '';
       sendBtn.disabled = true;
       setTyping(true);
-      var delay = 500 + Math.random() * 500;
-      setTimeout(function () {
-        var reply = getReply(trimmed);
+      fetchReply(trimmed).then(function (reply) {
         setTyping(false);
         addMessage('bot', reply);
-      }, delay);
+        sendBtn.disabled = !input.value.trim();
+      });
     }
 
     launcher.addEventListener('click', function () {
@@ -147,6 +119,6 @@
     }
 
     var greetName = launcher.getAttribute('data-username') || 'there';
-    addMessage('bot', "Hi " + greetName + ", I'm Ember. Ask me about pending approvals, team attendance, or payroll.");
+    addMessage('bot', "Hi " + greetName + ", I'm Ember. Ask me anything.");
   });
 })();
