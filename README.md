@@ -99,7 +99,7 @@ http://127.0.0.1:8000
 
 ## Employee Search
 
-![Employee Search](screenshots/employee%20search.jpeg)
+![Employee Search](screenshots/emplyee%20search.jpeg)
 
 ---
 
