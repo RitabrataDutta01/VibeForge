@@ -1,0 +1,43 @@
+{% extends "accounts/base.html" %}
+{% block title %}All Employees{% endblock %}
+{% block content %}
+
+<div class="hdr">
+    <h1 style="font-size:22px; font-weight:700;">All Employees</h1>
+    <a href="{% url 'create_employee' %}" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Add Employee</a>
+</div>
+
+<div class="card">
+    {% if profiles %}
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Employee ID</th>
+                <th scope="col">Department</th>
+                <th scope="col">Role</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for profile in profiles %}
+            <tr>
+                <td>
+                    <div class="row" style="border:none; padding:0;">
+                        <div class="avatar av-a">{{ profile.user.username|first|upper }}</div>
+                        {{ profile.user.username }}
+                    </div>
+                </td>
+                <td>{{ profile.employee_id }}</td>
+                <td>{{ profile.department|default:"—" }}</td>
+                <td><span class="badge badge-{{ profile.role|lower }}">{{ profile.role }}</span></td>
+                <td><a href="{% url 'edit_employee' profile.id %}" class="btn">Edit <i class="fa-solid fa-arrow-right"></i></a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p style="text-align:center; color:var(--text-muted); padding:2rem 0;">No employees yet. Add one to get started.</p>
+    {% endif %}
+</div>
+{% endblock %}

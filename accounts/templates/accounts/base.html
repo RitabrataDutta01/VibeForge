@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HRMS{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    {% if messages %}
+    <div class="messages" role="status" aria-live="polite" style="position:fixed; top:1rem; right:1rem; z-index:1000; display:flex; flex-direction:column; gap:8px;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'success' }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="brand"><i class="fa-solid fa-diagram-project"></i> HRMS</div>
+
+            <ul class="nav-list">
+                <li class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <a href="{% url 'profile' %}"><i class="fa-regular fa-user"></i> My Profile</a>
+                </li>
+
+                {% if user.profile.role == 'ADMIN' %}
+                <li class="nav-item {% if request.resolver_match.url_name == 'employee_list' %}active{% endif %}">
+                    <a href="{% url 'employee_list' %}"><i class="fa-solid fa-users"></i> Employees</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'create_employee' %}active{% endif %}">
+                    <a href="{% url 'create_employee' %}"><i class="fa-solid fa-user-plus"></i> Add Employee</a>
+                </li>
+                {% endif %}
+
+                {# <li class="nav-item"><a href="{% url 'attendance:home' %}"><i class="fa-regular fa-calendar-check"></i> Attendance</a></li> #}
+                {# <li class="nav-item"><a href="{% url 'leaves:home' %}"><i class="fa-solid fa-plane-departure"></i> Leave</a></li> #}
+                {# <li class="nav-item"><a href="{% url 'payroll:home' %}"><i class="fa-solid fa-wallet"></i> Payroll</a></li> #}
+            </ul>
+
+            <div class="user-profile-section">
+                {% if user.profile.profile_pic %}
+                    <img src="{{ user.profile.profile_pic.url }}" alt="{{ user.username }}">
+                {% else %}
+                    <div class="avatar av-a">{{ user.username|first|upper }}</div>
+                {% endif %}
+                <div class="user-profile-info">
+                    <div class="name">{{ user.username }}</div>
+                    <div class="role">{{ user.profile.role }}</div>
+                </div>
+                <a href="{% url 'logout' %}" class="logout-btn" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    {% else %}
+        {% block auth_content %}{% endblock %}
+    {% endif %}
+
+</body>
+</html>
